@@ -1,39 +1,53 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
+import apiConfig from "../api";
+const TopUsers = () => {
+  const [users, setUsers] = useState([]);
+  const [apiError, setApiError] = useState(false);
+  const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJNYXBDbGFpbXMiOnsiZXhwIjoxNzQyNDU4MTAwLCJpYXQiOjE3NDI0NTc4MDAsImlzcyI6IkFmZm9yZG1lZCIsImp0aSI6IjJlMjI3Y2E5LWI2YWItNDBmOS1hNjRlLWZmMjgzOTE1MGNhMyIsInN1YiI6InZhaWdhaXZlbmRoYW4xMzhAZ21haWwuY29tIn0sImNvbXBhbnlOYW1lIjoiU2FtcGxlIiwiY2xpZW50SUQiOiIyZTIyN2NhOS1iNmFiLTQwZjktYTY0ZS1mZjI4MzkxNTBjYTMiLCJjbGllbnRTZWNyZXQiOiJob2VHbHlCT2ZDbnNheEJsIiwib3duZXJOYW1lIjoiVmFpZ2FpIHZlbmRoYW4iLCJvd25lckVtYWlsIjoidmFpZ2FpdmVuZGhhbjEzOEBnbWFpbC5jb20iLCJyb2xsTm8iOiI3MTA3MjIyNDMwNTYifQ.3J4eoMKz7tECadnSWTYgaS1HEJani9jKzFXS1_ELD9c"
 
-function Feed() {
-    const [posts, setPosts] = useState([]);
+  useEffect(() => {
+    fetch("http://20.244.56.144/test/users", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        const userArray = Object.entries(data.users).map(([id, name]) => ({
+          id,
+          name,
+        }));
+        setUsers(userArray);
+      })
+      .catch(() => {
+        setApiError(true);
+        setUsers([
+          { id: 1, name: "John Doe" },
+          { id: 2, name: "Jane Doe" },
+          { id: 3, name: "Alice Smith" },
+          { id: 4, name: "Bob Johnson" },
+          { id: 5, name: "Charlie Brown" },
+        ]);
+      });
+  }, []);
 
-    useEffect(() => {
-        const fetchPosts = async () => {
-            const newPosts = [];
-            for (let i = 1; i <= 5; i++) {
-                newPosts.push({
-                    postId: i,
-                    userId: Math.floor(Math.random() * 100), // Random user ID
-                    username: `User${Math.floor(Math.random() * 100)}`, // Random username
-                    postName: `Post Title ${i}`,
-                    imageUrl: `https://picsum.photos/200/200?random=${i}`, // Random image from Picsum
-                });
-            }
-            setPosts(newPosts);
-        };
+  return (
+    <div className="max-w-3xl mx-auto p-6">
+      <h2 className="text-3xl font-bold text-gray-800 text-center mb-6">Top Users</h2>
+      {apiError && <p className="text-red-500 text-center mb-4">⚠️ API is not working. Showing sample users.</p>}
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {users.map((user) => (
+          <div key={user.id} className="flex items-center gap-4 bg-white shadow-md rounded-lg p-4 hover:shadow-lg transition">
+            <img
+              src={`https://picsum.photos/50/50?random=${user.id}`}
+              alt="User Avatar"
+              className="w-12 h-12 rounded-full object-cover"
+            />
+            <p className="text-lg font-medium text-gray-700">{user.name}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
-        fetchPosts();
-    }, []);
-
-    return (
-        <div className="py-5 px-5 flex flex-row gap-3 space-y-4">
-            {posts.map(post => (
-                <div key={post.postId} className="post border p-4 rounded w-300px shadow">
-                    <img src={post.imageUrl} alt="Post" className="w-200px h-auto rounded" />
-                    <h2 className="username font-bold">{post.username}</h2>
-                    <p className="postname">{post.postName}</p>
-                    <p className="postid">Post ID: {post.postId}</p>
-                    <p className="userid">User ID: {post.userId}</p>
-                </div>
-            ))}
-        </div>
-    );
-}
-
-export default Feed;
+export default TopUsers;
